@@ -25,25 +25,6 @@ class MayaBarberDialog(QtWidgets.QDialog):
 
 		self.control_layout = QtWidgets.QHBoxLayout()
 		self.main_layout.addLayout(self.control_layout)
-		self.volume_button = QtWidgets.QPushButton('🔊')
-		self.volume_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
-
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
-			'''
-			)
 
 		self.exist_button = QtWidgets.QPushButton('Exist🚪')
 		self.exist_button.clicked.connect(self.close)
@@ -66,7 +47,6 @@ class MayaBarberDialog(QtWidgets.QDialog):
 			'''
 			)
 
-		self.control_layout.addWidget(self.volume_button)
 		self.main_layout.addStretch()
 		self.control_layout.addWidget(self.exist_button)
 
@@ -191,6 +171,7 @@ class MayaBarberDialog(QtWidgets.QDialog):
 		menu.addAction("Curl Comb")
 		menu.addAction("Volume Comb")
 		menu.addAction("Detangle Comb")
+		menu.exec_(QtGui.QCursor.pos())
 
 
 
