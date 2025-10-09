@@ -202,7 +202,6 @@ class MayaBarberDialog(QtWidgets.QDialog):
 		menu.exec_(QtGui.QCursor.pos())
 
 
-	'''
 	def call_next_customer_and_update_preview(self):
 		mbarUtil.next_customer()
 		self.update_model_preview()
@@ -240,7 +239,6 @@ class MayaBarberDialog(QtWidgets.QDialog):
 			self.model_preview_label.setPixmap(pixmap)
 		else:
 			self.model_preview_label.setText("Failed to capture viewport.")
-		'''
 			
 def run():
 	global ui
