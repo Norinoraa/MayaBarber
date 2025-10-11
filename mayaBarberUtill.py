@@ -16,7 +16,7 @@ def next_customer():
 	
 	customer_files = [f for f in os.listdir(CUSTOMER_PATH) if f.endswith(".ma")]
 	if not customer_files:
-		cmds.warning("ไม่เจอไฟล์โมเดลลูกค้าในโฟลเดอร์ assets/customers!")
+		cmds.warning("can't not find model customer in folder assets/customers!")
 		return
 
 	chosen_customer_file = random.choice(customer_files)

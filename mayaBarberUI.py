@@ -7,6 +7,7 @@ import importlib
 import maya.cmds as cmds
 
 from . import mayaBarberUtill as mbarUtil
+from . import mayaBarberCusColor as mbarCusCL
 
 class MayaBarberDialog(QtWidgets.QDialog):
 	def __init__(self, parent=None):
@@ -22,7 +23,8 @@ class MayaBarberDialog(QtWidgets.QDialog):
 		self.setStyleSheet(
 			'''
 				QDialog{
-					background-color: #DED9DE; 
+					background-color: #DED9DE;
+					color: #453F3C;
 				}
 			'''
 			)
@@ -191,20 +193,47 @@ class MayaBarberDialog(QtWidgets.QDialog):
 
 
 	def colorPick(self):
-		color = QtWidgets.QColorDialog.getColor(QtGui.QColor("brown"), self, "Select Hair Color")
+		self.color = mbarCusCL.CustomColorPickerDialog.get_color(QtGui.QColor("brown"), self)
+		if color and color.isValid():
+			print(f"Color selected: {color.name()}")
 
 	def combMenu(self):
-		menu = QtWidgets.QMenu(self)
-		menu.addAction("Straight Comb")
-		menu.addAction("Curl Comb")
-		menu.addAction("Volume Comb")
-		menu.addAction("Detangle Comb")
-		menu.exec_(QtGui.QCursor.pos())
+		self.menu = QtWidgets.QMenu(self)
+
+		self.menu.setStyleSheet(
+			'''
+				QMenu{
+					background-color: #7D715C;
+					border-radius: 10px;
+					font-size: 20px;
+					font-family: Candara;
+					font-weight: bold;
+				}
+				QMenu:hover{
+					background-color: #CCA066;
+				}
+				QMenu:pressed{
+					background-color: #3D382A;
+				}
+				
+			'''
+			)
+
+		self.menu.addAction("Blunt bob")
+		self.menu.addAction("Ponytail")
+		self.menu.addAction("Bowl cut")
+		self.menu.addAction("Bun")
+		self.menu.exec_(QtGui.QCursor.pos())
+
+
 
 
 	def call_next_customer_and_update_preview(self):
 		mbarUtil.next_customer()
 		self.update_model_preview()
+		
+		self.money += 500
+		self.update_money_display()
 
 	def update_model_preview(self):
 		QtWidgets.QApplication.processEvents()
@@ -239,6 +268,9 @@ class MayaBarberDialog(QtWidgets.QDialog):
 			self.model_preview_label.setPixmap(pixmap)
 		else:
 			self.model_preview_label.setText("Failed to capture viewport.")
+
+	def update_money_display(self):
+		self.money_label.setText(f"Money: ${self.money}")
 			
 def run():
 	global ui
