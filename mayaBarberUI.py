@@ -13,264 +13,159 @@ class MayaBarberDialog(QtWidgets.QDialog):
 	def __init__(self, parent=None):
 		super().__init__(parent)
 
-		self.resize(500, 600)
+		self.resize(500, 650)
 		self.setWindowTitle('Maya Barber ✂️✨')
-
 		self.money = 0
+		
+		self.PREVIEW_IMAGE_PATH = "C:/Users/nadia/Documents/maya/2026/scripts/mayaBarber/Asset/Customer"
+		self.HAIR_STYLES_PATH = "C:/Users/nadia/Documents/maya/2026/scripts/mayaBarber/Asset/Hair"
 
 		self.main_layout = QtWidgets.QVBoxLayout(self)
 		self.setLayout(self.main_layout)
 		self.setStyleSheet(
 			'''
-				QDialog{
+				QDialog{ 
 					background-color: #DED9DE;
 					color: #453F3C;
-				}
+					}
 			'''
 			)
+		self.main_layout.setContentsMargins(10, 10, 10, 10)
+		self.main_layout.setSpacing(15)
 
-
-		self.control_layout = QtWidgets.QHBoxLayout()
-		self.main_layout.addLayout(self.control_layout)
-
+		control_layout = QtWidgets.QHBoxLayout()
 		self.money_label = QtWidgets.QLabel(f"Money: ${self.money}")
-		self.money_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #4CAF50;")
-		self.control_layout.addWidget(self.money_label)
-
-		self.control_layout.addStretch()
-
+		self.money_label.setStyleSheet(
+			'''
+				font-size: 18px;
+				font-weight: bold;
+				color: #4CAF50;
+			'''
+			)
 		self.exist_button = QtWidgets.QPushButton('Exist🚪')
 		self.exist_button.clicked.connect(self.close)
-		self.control_layout.addStretch()
-		self.exist_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
+		
+		control_layout.addWidget(self.money_label)
+		control_layout.addStretch()
+		control_layout.addWidget(self.exist_button)
+		self.main_layout.addLayout(control_layout)
 
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
-			'''
-			)
-
-		self.main_layout.addStretch()
-		self.control_layout.addWidget(self.exist_button)
-
-
-		self.main_layout.addStretch()
-
-		self.model_preview_label = QtWidgets.QLabel("Loading Customer...")
-		self.model_preview_label.setAlignment(QtCore.Qt.AlignCenter)
-		self.model_preview_label.setMinimumSize(400, 400)
-		self.model_preview_label.setStyleSheet(
+		self.scene = QtWidgets.QGraphicsScene()
+		self.view = QtWidgets.QGraphicsView(self.scene)
+		self.view.setMinimumSize(400, 300)
+		self.view.setStyleSheet(
 			'''
 				background-color: #F0EBEF;
 				border-radius: 15px;
 				border: 2px dashed #BDB8BD;
-
-			'''
-		)
-		
-		self.main_layout.addWidget(self.model_preview_label)
-
-		self.top_layout = QtWidgets.QHBoxLayout()
-		self.main_layout.addLayout(self.top_layout)
-		self.cut_button = QtWidgets.QPushButton('Cut ✂️')
-		self.cut_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
 			'''
 			)
+		
+		customer_pixmap = QtGui.QPixmap(f"{self.PREVIEW_IMAGE_PATH}/custommer1.png")
+		customer_pixmap = customer_pixmap.scaled(
+			QtCore.QSize(400, 400),
+			QtCore.Qt.KeepAspectRatio,
+			QtCore.Qt.SmoothTransformation
+		)
+
+		self.customer_base_item = QtWidgets.QGraphicsPixmapItem(customer_pixmap)
+
+
+		hair_pixmap = QtGui.QPixmap(f"{self.HAIR_STYLES_PATH}/bob.png")
+		hair_pixmap = hair_pixmap.scaled(
+			QtCore.QSize(400, 400),
+			QtCore.Qt.KeepAspectRatio,
+			QtCore.Qt.SmoothTransformation
+		)
+		self.hair_item = QtWidgets.QGraphicsPixmapItem(hair_pixmap)
+
+		self.customer_base_item.setZValue(0)
+		self.hair_item.setZValue(1)
+
+
+		self.scene.addItem(self.customer_base_item)
+		self.scene.addItem(self.hair_item)
+		
+
+		self.main_layout.addWidget(self.view)
+
+
+		button_grid_layout = QtWidgets.QGridLayout()
+		self.cut_button = QtWidgets.QPushButton('Cut ✂️')
 
 		self.color_button = QtWidgets.QPushButton('Color 🎨')
 		self.color_button.clicked.connect(self.colorPick)
-		self.color_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
-			'''
-			)
-		self.top_layout.addWidget(self.cut_button)
-		self.top_layout.addWidget(self.color_button)
 
-		self.middle_layout = QtWidgets.QHBoxLayout()
-		self.main_layout.addLayout(self.middle_layout)
 		self.comb_button = QtWidgets.QPushButton('Comb 🪮')
 		self.comb_button.clicked.connect(self.combMenu)
-		self.comb_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
-			'''
-			)
 
 		self.reset_button = QtWidgets.QPushButton('Reset ✨')
-		self.reset_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
-			'''
-			)
 
-		self.middle_layout.addWidget(self.comb_button)
-		self.middle_layout.addWidget(self.reset_button)
+		button_grid_layout.addWidget(self.cut_button, 0, 0)
+		button_grid_layout.addWidget(self.color_button, 0, 1)
+		button_grid_layout.addWidget(self.comb_button, 1, 0)
+		button_grid_layout.addWidget(self.reset_button, 1, 1)
+		self.main_layout.addLayout(button_grid_layout)
 
-		self.bottom_layout = QtWidgets.QHBoxLayout()
-		self.main_layout.addLayout(self.bottom_layout)
+
 		self.nextCustomer_button = QtWidgets.QPushButton('Next Customer 😊')
-		self.nextCustomer_button.setStyleSheet(
-			'''
-				QPushButton{
-					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-					padding: 8px;
-				}
-				QPushButton:hover{
-					background-color: #CCA066;
-				}
-				QPushButton:pressed{
-					background-color: #3D382A;
-			'''
-			)
-		self.bottom_layout.addWidget(self.nextCustomer_button)
-		self.nextCustomer_button.clicked.connect(self.call_next_customer_and_update_preview)
+		self.main_layout.addWidget(self.nextCustomer_button)
 
+
+		button_style = '''
+			QPushButton {
+				background-color: #7D715C;
+				border-radius: 10px;
+				color: white;
+				font-size: 20px;
+				font-family: Candara;
+				font-weight: bold;
+				padding: 8px;
+			}
+			QPushButton:hover { background-color: #CCA066; }
+			QPushButton:pressed { background-color: #3D382A; }
+		'''
+		all_buttons = [self.exist_button, self.cut_button, self.color_button, 
+					   self.comb_button, self.reset_button, self.nextCustomer_button]
+		for btn in all_buttons:
+			btn.setStyleSheet(button_style)
 
 	def colorPick(self):
-		self.color = mbarCusCL.CustomColorPickerDialog.get_color(QtGui.QColor("brown"), self)
-		if color and color.isValid():
-			print(f"Color selected: {color.name()}")
+		color = QtWidgets.QColorDialog.getColor()
+		if color.isValid():
+			colorize_effect = QtWidgets.QGraphicsColorizeEffect()
+			colorize_effect.setColor(color)
+			self.hair_item.setGraphicsEffect(colorize_effect)
 
 	def combMenu(self):
-		self.menu = QtWidgets.QMenu(self)
-
-		self.menu.setStyleSheet(
-			'''
-				QMenu{
+		menu = QtWidgets.QMenu(self)
+		menu.setStyleSheet(
+			"""
+				QMenu{ 
+					background-color: #5D5443;
+					border: 1px solid #7D715C;
+					color: #E0D6C4;
+					}
+				QMenu::item{
+					padding: 5px 25px;
+					border-radius: 5px;
+					}
+				QMenu::item:selected{ 
 					background-color: #7D715C;
-					border-radius: 10px;
-					font-size: 20px;
-					font-family: Candara;
-					font-weight: bold;
-				}
-				QMenu:hover{
-					background-color: #CCA066;
-				}
-				QMenu:pressed{
-					background-color: #3D382A;
-				}
-				
-			'''
+					color: #FFFFFF;
+					}
+			"""
 			)
-
-		self.menu.addAction("Blunt bob")
-		self.menu.addAction("Ponytail")
-		self.menu.addAction("Bowl cut")
-		self.menu.addAction("Bun")
-		self.menu.exec_(QtGui.QCursor.pos())
-
-
-
-
-	def call_next_customer_and_update_preview(self):
-		mbarUtil.next_customer()
-		self.update_model_preview()
+		action_bob = menu.addAction("Blunt bob")
 		
-		self.money += 500
-		self.update_money_display()
-
-	def update_model_preview(self):
-		QtWidgets.QApplication.processEvents()
-
-		try:
-			model_panel = cmds.getPanel(withLabel='Persp View')
-			if not model_panel or "modelPanel" not in model_panel:
-				 model_panel = cmds.getPanel(visiblePanels=True)[0]
-		except Exception:
-			model_panel = cmds.getPanel(withFocus=True)
-
-		if "modelPanel" not in model_panel:
-			print("Error: No valid model panel found for capturing.")
-			return
+		action_ponytail = menu.addAction("Ponytail")
 		
-		cmds.modelEditor(model_panel, edit=True, displayAppearance='smoothShaded', grid=False, headsUpDisplay=False)
-		
-		temp_path = os.path.join(cmds.internalVar(userTmpDir=True), 'maya_barber_preview.png')
-		
-		cmds.playblast(
-			format='image', filename=temp_path, sequenceTime=0,
-			clearCache=1, viewer=False, showOrnaments=False,
-			framePadding=0, percent=100, compression="png",
-			quality=100, widthHeight=[512, 512]
-		)
-		
-		cmds.modelEditor(model_panel, edit=True, grid=True, headsUpDisplay=True)
+		action_bowl = menu.addAction("Bowl cut")
 
-		if os.path.exists(temp_path):
-			pixmap = QtGui.QPixmap(temp_path)
-			self.model_preview_label.setScaledContents(True)
-			self.model_preview_label.setPixmap(pixmap)
-		else:
-			self.model_preview_label.setText("Failed to capture viewport.")
+		action_bun = menu.addAction("Bun")
 
-	def update_money_display(self):
-		self.money_label.setText(f"Money: ${self.money}")
+		menu.exec_(QtGui.QCursor.pos())
+
 			
 def run():
 	global ui
