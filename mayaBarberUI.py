@@ -5,8 +5,11 @@ import maya.OpenMayaUI as omui
 import os
 import importlib
 import maya.cmds as cmds
+import random
 
 from . import mayaBarberUtill as mbarUtil
+importlib.reload(mbarUtil)
+
 from . import mayaBarberCusColor as mbarCusCL
 
 class MayaBarberDialog(QtWidgets.QDialog):
@@ -16,10 +19,8 @@ class MayaBarberDialog(QtWidgets.QDialog):
 		self.resize(500, 650)
 		self.setWindowTitle('Maya Barber ✂️✨')
 		self.money = 0
-		
-		self.PREVIEW_IMAGE_PATH = "C:/Users/nadia/Documents/maya/2026/scripts/mayaBarber/Asset/Customer"
-		self.HAIR_STYLES_PATH = "C:/Users/nadia/Documents/maya/2026/scripts/mayaBarber/Asset/Hair"
-
+		self.is_first_customer = True
+				
 		self.main_layout = QtWidgets.QVBoxLayout(self)
 		self.setLayout(self.main_layout)
 		self.setStyleSheet(
@@ -61,23 +62,20 @@ class MayaBarberDialog(QtWidgets.QDialog):
 			'''
 			)
 		
-		customer_pixmap = QtGui.QPixmap(f"{self.PREVIEW_IMAGE_PATH}/custommer1.png")
-		customer_pixmap = customer_pixmap.scaled(
-			QtCore.QSize(400, 400),
-			QtCore.Qt.KeepAspectRatio,
-			QtCore.Qt.SmoothTransformation
-		)
-
-		self.customer_base_item = QtWidgets.QGraphicsPixmapItem(customer_pixmap)
+		self.customer_base_item = QtWidgets.QGraphicsPixmapItem()
 
 
-		hair_pixmap = QtGui.QPixmap(f"{self.HAIR_STYLES_PATH}/bob.png")
-		hair_pixmap = hair_pixmap.scaled(
-			QtCore.QSize(400, 400),
-			QtCore.Qt.KeepAspectRatio,
-			QtCore.Qt.SmoothTransformation
-		)
-		self.hair_item = QtWidgets.QGraphicsPixmapItem(hair_pixmap)
+		initial_hair_path = mbarUtil.get_hair_style_path("bob.png")
+		if initial_hair_path:
+			hair_pixmap = QtGui.QPixmap(initial_hair_path)
+			hair_pixmap = hair_pixmap.scaled(
+				QtCore.QSize(400, 400),
+				QtCore.Qt.KeepAspectRatio,
+				QtCore.Qt.SmoothTransformation
+			)
+			self.hair_item = QtWidgets.QGraphicsPixmapItem(hair_pixmap)
+		else:
+			self.hair_item = QtWidgets.QGraphicsPixmapItem()
 
 		self.customer_base_item.setZValue(0)
 		self.hair_item.setZValue(1)
@@ -92,6 +90,7 @@ class MayaBarberDialog(QtWidgets.QDialog):
 
 		button_grid_layout = QtWidgets.QGridLayout()
 		self.cut_button = QtWidgets.QPushButton('Cut ✂️')
+		self.cut_button.clicked.connect(self.cut_hair)
 
 		self.color_button = QtWidgets.QPushButton('Color 🎨')
 		self.color_button.clicked.connect(self.colorPick)
@@ -100,6 +99,7 @@ class MayaBarberDialog(QtWidgets.QDialog):
 		self.comb_button.clicked.connect(self.combMenu)
 
 		self.reset_button = QtWidgets.QPushButton('Reset ✨')
+		self.reset_button.clicked.connect(self.reset_hair)
 
 		button_grid_layout.addWidget(self.cut_button, 0, 0)
 		button_grid_layout.addWidget(self.color_button, 0, 1)
@@ -109,7 +109,10 @@ class MayaBarberDialog(QtWidgets.QDialog):
 
 
 		self.nextCustomer_button = QtWidgets.QPushButton('Next Customer 😊')
+		self.nextCustomer_button.clicked.connect(self.load_next_customer)
 		self.main_layout.addWidget(self.nextCustomer_button)
+
+		self.load_next_customer()
 
 
 		button_style = '''
@@ -138,10 +141,11 @@ class MayaBarberDialog(QtWidgets.QDialog):
 			self.hair_item.setGraphicsEffect(colorize_effect)
 
 	def combMenu(self):
-		menu = QtWidgets.QMenu(self)
-		menu.setStyleSheet(
-			"""
+			menu = QtWidgets.QMenu(self)
+			menu.setStyleSheet(
+				"""
 				QMenu{ 
+
 					background-color: #5D5443;
 					border: 1px solid #7D715C;
 					color: #E0D6C4;
@@ -154,19 +158,55 @@ class MayaBarberDialog(QtWidgets.QDialog):
 					background-color: #7D715C;
 					color: #FFFFFF;
 					}
-			"""
+			""" 
 			)
-		action_bob = menu.addAction("Blunt bob")
-		
-		action_ponytail = menu.addAction("Ponytail")
-		
-		action_bowl = menu.addAction("Bowl cut")
 
-		action_bun = menu.addAction("Bun")
+			hair_styles_map = mbarUtil.HAIR_STYLES_MAP
 
-		menu.exec_(QtGui.QCursor.pos())
-
+			for display_name, file_name in hair_styles_map.items():
+				action = menu.addAction(display_name)
+				action.triggered.connect(lambda checked=False, fn=file_name: self.change_hair_style(fn))
 			
+			menu.exec_(QtGui.QCursor.pos())
+
+	def load_next_customer(self):
+			if not self.is_first_customer:
+				self.money += 500
+				self.money_label.setText(f"Money: ${self.money}")
+			image_path = mbarUtil.get_random_customer_path()
+
+			if image_path:
+				customer_pixmap = QtGui.QPixmap(image_path)
+				customer_pixmap = customer_pixmap.scaled(
+					QtCore.QSize(400, 400),
+					QtCore.Qt.KeepAspectRatio,
+					QtCore.Qt.SmoothTransformation
+				)
+				self.customer_base_item.setPixmap(customer_pixmap)
+
+			self.is_first_customer = False
+
+	def change_hair_style(self, hair_filename):
+			image_path = mbarUtil.get_hair_style_path(hair_filename)
+
+			if image_path:
+				self.hair_item.show()
+				
+				hair_pixmap = QtGui.QPixmap(image_path)
+				hair_pixmap = hair_pixmap.scaled(
+					QtCore.QSize(400, 400),
+					QtCore.Qt.KeepAspectRatio,
+					QtCore.Qt.SmoothTransformation
+				)
+				self.hair_item.setPixmap(hair_pixmap)
+				self.hair_item.setGraphicsEffect(None)
+
+	def cut_hair(self):
+		self.hair_item.hide()
+
+	def reset_hair(self):
+		self.change_hair_style("bob.png")
+		
 def run():
 	global ui
 	try:
