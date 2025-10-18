@@ -10,7 +10,6 @@ import random
 from . import mayaBarberUtill as mbarUtil
 importlib.reload(mbarUtil)
 
-from . import mayaBarberCusColor as mbarCusCL
 
 class MayaBarberDialog(QtWidgets.QDialog):
 	def __init__(self, parent=None):
